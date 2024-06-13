@@ -6,4 +6,6 @@
 
 <p><a href="BasicWebDev/assignment1.html" target="blank"> Assignment 1 </a> </p>
 
+<p><a href="BasicWebDev/images.html" target="blank"> Images Practice </a> </p>
+
 
