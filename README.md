@@ -8,4 +8,4 @@
 
 <p><a href="BasicWebDev/images.html" target="blank"> Images Practice </a> </p>
 
-
+<p><a href="BasicWebDev/images2.html" target="blank"> Images Practice 2 </a> </p>
