@@ -9,4 +9,8 @@
 <p> A practice of the use of images in HTML. </p>
 
 <p><a href="BasicWebDev/images.html" target="blank"> Images Practice </a> </p>
+<hr>
+<p> A practice of tables in HTML. </p>
+
+<p><a href="BasicWebDev/tables.html" target="blank"> Tables Practice </a> </p>
 
