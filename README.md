@@ -13,4 +13,8 @@
 <p> A practice of tables in HTML. </p>
 
 <p><a href="BasicWebDev/tables.html" target="blank"> Tables Practice </a> </p>
+<hr>
+<p> A Math Test to prove your knowledge. </p>
+
+<p><a href="BasicWebDev/mathtest.html" target="blank"> Math Test </a> </p>
 
