@@ -1,3 +1,9 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Lalo's Webpage</title>
+</head>
+
 <h1>  Lalo's  Stories </h1>
 
 <p>  Welcome everyone! To this digital space, where we share things that generate discussion.  </p>
@@ -17,4 +23,4 @@
 <p> A math test to prove your knowledge. </p>
 
 <p><a href="BasicWebDev/mathtest.html" target="blank"> Math Test </a> </p>
-
+</html>
