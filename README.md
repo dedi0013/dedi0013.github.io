@@ -22,3 +22,8 @@
 
 <p><a href="BasicWebDev/colors.html" target="blank"> Colors Table </a> </p>
 
+<hr>
+<p> Menu for Restaurant. </p>
+
+<p><a href="BasicWebDev/menu.html" target="blank"> Menu </a> </p>
+
