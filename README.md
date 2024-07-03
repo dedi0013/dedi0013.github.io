@@ -17,4 +17,8 @@
 <p> A math test to prove your knowledge. </p>
 
 <p><a href="BasicWebDev/mathtest.html" target="blank"> Math Test </a> </p>
+<hr>
+<p> Colors Table. </p>
+
+<p><a href="BasicWebDev/colors.html" target="blank"> Colors Table </a> </p>
 
