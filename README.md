@@ -30,4 +30,8 @@
 <p> This is a schedule for a very busy day. </p>
 
 <p><a href="BasicWebDev/schedule.html" target="blank"> Schedule </a> </p>
+<hr>
+<p> This is my team of people. </p>
+
+<p><a href="BasicWebDev/teampage.html" target="blank"> Team </a> </p>
 
