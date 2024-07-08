@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Puzzle Assignment</title>
+</head>
+
+<style>
+
+  .puzzle-container {
+  display: grid;
+  grid-template-rows: auto 1fr auto; 
+  grid-gap: 10px; 
+}
+
+.puzzle-info {
+  text-align: center; 
+}
+
+.puzzle-image {
+  display: flex;
+  justify-content: center; 
+  align-items: center; 
+}
+
+.puzzle-pieces {
+  display: flex;
+  flex-wrap: wrap; 
+}
+
+</style>
+  
+<body>
+    <div class="puzzle-container">
+        <header class="puzzle-info">
+            <h2>Your Name</h2>
+            <p>Puzzle: Butterflies</p>
+        </header>
+        <div class="puzzle-image">
+            <div class="puzzle-pieces">
+                <img src="images/puzzle_piece1.jpg" alt="Puzzle Piece 1">
+                <img src="images/puzzle_piece2.jpg" alt="Puzzle Piece 2">
+                <img src="images/incorrect_piece.jpg" alt="Incorrect Puzzle Piece" style="display: none;"> </div>
+            <img src="image.jpg" alt="Assembled Puzzle (Optional)"> </div>
+        <p class="assignment-date">Completed: 2024-07-08</p>
+    </div>
+</body>
+</html>
