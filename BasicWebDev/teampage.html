@@ -1,10 +1,11 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html>
-<head dark="true">
+<head>
     <title>Plantastic Pals</title>
 </head>
 
   <style>
+  /* This is the original code */
 body {
     font-family: sans-serif;
     margin: 0;
@@ -46,16 +47,18 @@ nav a {
 	  
 main {
     padding: 20px;
-
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-around;
 }
 
 h2 {
+    text-align: center;
     margin: 20px;
 }
 		  
 .team-member {
-	float: left;
-    width: 50%;
+    width: 30%;
     margin-bottom: 20px;
     text-align: center;
 }
@@ -77,7 +80,7 @@ h2 {
     </header>
     <nav>
         <ul>
-            <li><a href="#">About Us  </a></li>
+            <li><a href="#">About Us</a></li>
             <li><a href="#">Our Care Tips</a></li>
             <li><a href="#">Join the Community</a></li>
         </ul>
