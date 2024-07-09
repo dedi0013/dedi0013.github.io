@@ -23,7 +23,7 @@
 <p><a href="BasicWebDev/colors.html" target="blank"> Colors Table </a> </p>
 
 <hr>
-<p> Menu for Restaurant. </p>
+<p> A menu for a very nice restaurant. </p>
 
 <p><a href="BasicWebDev/menu.html" target="blank"> Menu </a> </p>
 <hr>
@@ -34,4 +34,8 @@
 <p> This is my team of people. </p>
 
 <p><a href="BasicWebDev/teampage.html" target="blank"> Team </a> </p>
+<hr>
+<p> Puzzle. </p>
+
+<p><a href="BasicWebDev/puzzle.html" target="blank"> Puzzle </a> </p>
 
