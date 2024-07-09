@@ -1,47 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Puzzle Assignment</title>
+  <title>CSS Grid Puzzle - Lalo</title>
 </head>
 
 <style>
-
-  .puzzle-container {
+.container {
   display: grid;
-  grid-template-rows: auto 1fr auto; 
-  grid-gap: 10px; 
+  grid-template-columns: 1fr;
+  grid-template-rows: auto 1fr auto;
+  gap: 20px;
 }
 
-.puzzle-info {
-  text-align: center; 
+.header,
+.footer {
+  padding: 20px;
+  text-align: center;
 }
 
-.puzzle-image {
+.puzzle-container {
   display: flex;
-  justify-content: center; 
-  align-items: center; 
+  flex-wrap: wrap;
+  justify-content: space-between; /* Adjust for different puzzle layouts */
 }
 
-.puzzle-pieces {
-  display: flex;
-  flex-wrap: wrap; 
+.puzzle-piece {
+  width: calc(33% - 20px); /* Adjust width based on number of pieces per row */
+  height: auto;
 }
 
+.hidden {
+  display: none;
+} 
 </style>
-  
+    
 <body>
-    <div class="puzzle-container">
-        <header class="puzzle-info">
-            <h2>Your Name</h2>
-            <p>Puzzle: Butterflies</p>
-        </header>
-        <div class="puzzle-image">
-            <div class="puzzle-pieces">
-                <img src="images/puzzle_piece1.jpg" alt="Puzzle Piece 1">
-                <img src="images/puzzle_piece2.jpg" alt="Puzzle Piece 2">
-                <img src="images/incorrect_piece.jpg" alt="Incorrect Puzzle Piece" style="display: none;"> </div>
-            <img src="image.jpg" alt="Assembled Puzzle (Optional)"> </div>
-        <p class="assignment-date">Completed: 2024-07-08</p>
-    </div>
+  <div class="container">
+    <header class="header">
+      <h2>Lalo - Puzzle: Snowman </h2>
+      <p>Assignment Date: 09/07/2024 </p>
+    </header>
+    <section class="puzzle-container">
+      <img src="../../imagesfolder/puzzle-piece1.jpg" alt="Puzzle Piece 1" class="puzzle-piece">
+      <img src="../../imagesfolder/puzzle-piece2.jpg" alt="Puzzle Piece 2" class="puzzle-piece">
+      <img src="../../imagesfolder/trick-piece.jpg" alt="Trick Piece" class="puzzle-piece hidden">
+    </section>
+    <footer class="footer">
+      <p>Designed and Built with CSS Grid & Flexbox</p>
+    </footer>
+  </div>
 </body>
 </html>
