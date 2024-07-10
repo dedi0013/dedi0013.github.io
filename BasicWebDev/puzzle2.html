@@ -1,0 +1,64 @@
+.container {
+  display: grid;
+  grid-template-rows: auto 1fr auto; /* Header, Main Content, Footer */
+  min-height: 100vh; /* Stretch to viewport height */
+}
+
+.header,
+.main,
+.footer {
+  padding: 1rem;
+}
+
+.header {
+  text-align: center;
+}
+
+.main {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.puzzle-container {
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap onto multiple lines */
+}
+
+.puzzle-container img {
+  width: 25%; /* Adjust width based on number of columns */
+  height: 25%; /* Adjust height based on number of rows */
+}
+
+/* Flexbox properties for puzzle solution (adjust as needed) */
+.puzzle-container img:nth-child(1),  /* Image Q */
+.puzzle-container img:nth-child(5),  /* Image M */
+.puzzle-container img:nth-child(9),  /* Image E */
+.puzzle-container img:nth-child(13)  /* Image I */ {
+  order: 0; /* Place in top row */
+}
+
+.puzzle-container img:nth-child(2),  /* Image G */
+.puzzle-container img:nth-child(6),  /* Image P */
+.puzzle-container img:nth-child(10), /* Image O */
+.puzzle-container img:nth-child(14) /* Image F */ {
+  order: 1; /* Place in second row */
+}
+
+.puzzle-container img:nth-child(3),  /* Image A */
+.puzzle-container img:nth-child(7),  /* Image B */
+.puzzle-container img:nth-child(11), /* Image N */
+.puzzle-container img:nth-child(15) /* Image L */ {
+  order: 2; /* Place in third row */
+}
+
+.puzzle-container img:nth-child(4),  /* Image J (Wrong Piece) */
+.puzzle-container img:nth-child(8),  /* Image H */
+.puzzle-container img:nth-child(12), /* Image C */
+.puzzle-container img:nth-child(16) /* Image K */ {
+  order: 3; /* Place in fourth row */
+}
+
+.hidden-piece {
+  display: none; /* Hide the wrong puzzle piece */
+}
