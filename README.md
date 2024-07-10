@@ -44,3 +44,9 @@
 
 <p><a href="BasicWebDev/scorecards.html" target="blank"> Scorecards </a> </p>
 
+<hr>
+<p> Video Embedding. </p>
+
+<p><a href="BasicWebDev/videoembedding.html" target="blank"> Video Embedding </a> </p>
+
+
