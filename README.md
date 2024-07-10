@@ -39,3 +39,8 @@
 
 <p><a href="BasicWebDev/puzzle.html" target="blank"> Puzzle </a> </p>
 
+<hr>
+<p> Scorecards Games. </p>
+
+<p><a href="BasicWebDev/scorecards.html" target="blank"> Scorecards </a> </p>
+
