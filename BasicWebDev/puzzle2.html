@@ -32,15 +32,15 @@
 }
 
 .puzzle-container img {
-  width: 25%; 
-  height: 25%; 
+  width: 15%; 
+  height: 15%; 
 }
 
 /* Flexbox properties for puzzle solution (adjust as needed) */
 .puzzle-container img:nth-child(1),  /* Image Q */
 .puzzle-container img:nth-child(5),  /* Image M */
 .puzzle-container img:nth-child(9),  /* Image E */
-.puzzle-container img:nth-child(13)  /* Image I */ {
+.puzzle-container img:nth-child(13)  /* Image I */ 
   order: 0; /* Place in top row */
 }
 
@@ -58,7 +58,7 @@
   order: 2; /* Place in third row */
 }
 
-.puzzle-container img:nth-child(4),  /* Image J (Wrong Piece) */
+.puzzle-container img:nth-child(4),  /* Image J */
 .puzzle-container img:nth-child(8),  /* Image H */
 .puzzle-container img:nth-child(12), /* Image C */
 .puzzle-container img:nth-child(16) /* Image K */ {
@@ -66,7 +66,7 @@
 }
 
 .hidden-piece {
-  display: none; /* Hide the wrong puzzle piece */
+  display: none; 
 }
   </style>
   
