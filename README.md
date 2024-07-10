@@ -31,11 +31,11 @@
 
 <p><a href="BasicWebDev/schedule.html" target="blank"> Schedule </a> </p>
 <hr>
-<p> This is my team of people. </p>
+<p> This is my team with plants. </p>
 
 <p><a href="BasicWebDev/teampage.html" target="blank"> Team </a> </p>
 <hr>
-<p> Puzzle. </p>
+<p> A nice butterfly puzzle. </p>
 
 <p><a href="BasicWebDev/puzzle.html" target="blank"> Puzzle </a> </p>
 
@@ -45,7 +45,7 @@
 <p><a href="BasicWebDev/scorecards.html" target="blank"> Scorecards </a> </p>
 
 <hr>
-<p> Video Embedding. </p>
+<p> Video Embedding Tutorial. </p>
 
 <p><a href="BasicWebDev/videoembedding.html" target="blank"> Video Embedding </a> </p>
 
