@@ -1,4 +1,10 @@
-.container {
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Single-Page Puzzle</title>
+</head>
+  <style>
+    .container {
   display: grid;
   grid-template-rows: auto 1fr auto; /* Header, Main Content, Footer */
   min-height: 100vh; /* Stretch to viewport height */
@@ -62,3 +68,24 @@
 .hidden-piece {
   display: none; /* Hide the wrong puzzle piece */
 }
+  </style>
+  
+  <body>
+  
+  <div class="container">
+    <header class="header">
+      <h2>My Name - Puzzle Challenge</h2>
+    </header>
+    
+    <main class="main">
+      <div class="puzzle-container">
+        </div>
+    </main>
+    <footer class="footer">
+      <p>Assignment Completed: 2024-07-10</p>
+    </footer>
+  </div>
+  
+  <img src="../../imagesfolder/puzzle1_D.jpg" class="hidden-piece" alt="Wrong Puzzle Piece">
+</body>
+</html>
