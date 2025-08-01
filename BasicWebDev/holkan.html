@@ -1,0 +1,675 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Piloto de Monitorización de Flota con IA</title>
+    <!-- Incluye el CDN de Tailwind CSS para un estilo rápido y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Incluye la fuente Inter de Google Fonts -->
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
+    <!-- Incluye Leaflet CSS para OpenStreetMap -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha2d-dJ1xLhJ7a9Dq4fD+y+V+fBvF5x+e+k/jW+V+n+f5+g==" crossorigin=""/>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .scroll-container {
+            -ms-overflow-style: none; /* IE y Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .scroll-container::-webkit-scrollbar {
+            display: none; /* Chrome, Safari y Opera */
+        }
+        #map {
+            height: 100%;
+            width: 100%;
+            border-radius: 0.5rem; /* rounded-lg */
+            box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); /* shadow-inner */
+            border: 4px solid #e5e7eb; /* border-4 border-gray-200 */
+        }
+    </style>
+    <!-- Script para Leaflet.js (OpenStreetMap) -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha2d-dJ1xLhJ7a9Dq4fD+y+V+fBvF5x+e+k/jW+V+n+f5+g==" crossorigin=""></script>
+</head>
+<body class="min-h-screen bg-gray-100 text-gray-900 p-4 flex flex-col items-center">
+    <!-- Título de la página con la imagen y el texto -->
+    <div class="w-full max-w-7xl mb-4 p-4 bg-white rounded-xl shadow-lg flex flex-col md:flex-row items-center gap-8">
+        <img src="https://play-lh.googleusercontent.com/j41LOAZLe1a3yY1E_36ZG2Za2xCHrGIRsOjbczK-ylHCSiusaFFb-OycxfmeorQ_rRM" alt="Logo de Holkan App" class="w-24 h-auto">
+        <h1 class="text-4xl md:text-6xl font-extrabold text-gray-800">Holkan: Rastreo Satelital</h1>
+    </div>
+
+    <div class="w-full max-w-7xl flex flex-col md:flex-row gap-4">
+
+        <!-- Panel Izquierdo: Mapa y Datos del Camión -->
+        <div class="flex-1 flex flex-col gap-4">
+            <div class="flex-1 bg-white shadow-lg rounded-xl overflow-hidden">
+                <div class="p-6">
+                    <h2 class="flex items-center gap-2 text-2xl font-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-500"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                        <span>Visualización de la Flota</span>
+                    </h2>
+                    <p class="text-sm text-gray-500">Seguimiento de la unidad <span id="truck-id"></span> en tiempo real.</p>
+                </div>
+                <div class="p-6 pt-0">
+                    <!-- Mapa de OpenStreetMap -->
+                    <div class="w-full aspect-video">
+                        <div id="map" class="relative w-full aspect-video rounded-lg shadow-inner border-4 border-gray-200 overflow-hidden"></div>
+                    </div>
+                    <hr class="my-4" />
+                    <!-- Datos en tiempo real -->
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-center mt-4" id="realtime-data">
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg">Operador</h3>
+                            <p id="data-operator" class="text-xl font-bold text-gray-700"></p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg">Estado</h3>
+                            <p id="data-status" class="text-xl font-bold text-green-600"></p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg">Velocidad Actual</h3>
+                            <p id="data-speed" class="text-xl font-bold text-blue-600"></p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg">Ubicación</h3>
+                            <p id="data-geofence" class="text-sm font-bold text-gray-700"></p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg">ETA</h3>
+                            <p id="data-eta" class="text-xl font-bold text-purple-600"></p>
+                        </div>
+                        <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                            <h3 class="font-semibold text-lg">Desviación</h3>
+                            <p id="data-deviation" class="text-xl font-bold text-red-600"></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Panel Derecho: Comunicación y Alertas -->
+        <div class="flex-1 flex flex-col gap-4">
+            <div class="flex-1 bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                    <h2 class="flex items-center gap-2 text-2xl font-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-purple-500"><path d="M7.9 20A9.32 9.32 0 0 1 4 16V4a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2h-.1L6.7 22Z"/><path d="M12 12c.7-.7 2.1-2.2 4-4"/></svg>
+                        <span>Comunicación Inteligente</span>
+                    </h2>
+                    <p class="text-sm text-gray-500">Chatbot para interacción automatizada con el operador.</p>
+                </div>
+                <div class="h-96 flex flex-col overflow-hidden p-6 pt-0">
+                    <div id="chat-container" class="flex-1 overflow-y-auto p-2 space-y-2 scroll-container">
+                        <!-- Mensajes de chat se renderizarán aquí -->
+                    </div>
+                    <div class="mt-4 flex flex-col gap-2">
+                        <p class="text-sm text-gray-500">Simular acciones:</p>
+                        <div class="flex gap-2 flex-wrap">
+                            <button onclick="sendOperatorReport('Llegué a la bodega. Descansando.')" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-bold rounded-lg shadow transition-colors">
+                                Reporte: Llegada
+                            </button>
+                            <button onclick="sendOperatorReport('Tengo una avería mecánica grave.')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow transition-colors">
+                                Reporte: Avería
+                            </button>
+                            <!-- Botón para resolver la avería, ahora siempre está visible para ilustrar el cambio -->
+                            <button id="resolve-button" onclick="resolveBreakdown()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition-colors" style="display: none;">
+                                Resolver Avería
+                            </button>
+                            <!-- Nuevo botón para llamar al supervisor -->
+                            <button onclick="callSupervisor()" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-bold rounded-lg shadow transition-colors flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white"><path d="M22 16.92v3a2 2 0 0 1-2.18 2.02 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-4.1-4.1A19.79 19.79 0 0 1 2.02 4.18 2 2 0 0 1 4.02 2h3a2 2 0 0 1 2 2c0 2.2-1.2 3.8-2.5 5.5l2.1 2.1c1.7-1.3 3.3-2.5 5.5-2.5a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2z"/></svg>
+                                <span>Llamar a Supervisor</span>
+                            </button>
+                        </div>
+
+                        <!-- Campo para que el operador envíe un mensaje -->
+                        <div class="mt-4 flex items-center gap-2">
+                            <input id="chat-input" type="text" placeholder="Escribir mensaje..." class="flex-1 p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <button onclick="sendOperatorMessage()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg shadow transition-colors">
+                                Enviar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex-1 bg-white shadow-lg rounded-xl">
+                <div class="p-6">
+                    <h2 class="flex items-center gap-2 text-2xl font-bold">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-500"><path d="m21.73 18-8-14c-.93-1.65-3.07-1.65-4 0l-8 14c-.87 1.54.24 3.42 2 3.42h16c1.77 0 2.88-1.88 2-3.42Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        <span>Alertas y Anomalías</span>
+                    </h2>
+                    <p class="text-sm text-gray-500">Detección proactiva de eventos.</p>
+                </div>
+                <div id="alerts-container" class="h-64 overflow-y-auto p-6 pt-0 scroll-container">
+                    <!-- Alertas se renderizarán aquí -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sección Inferior: Reportes y Métricas -->
+    <div class="w-full max-w-7xl mt-4">
+        <div class="bg-white shadow-lg rounded-xl p-6">
+            <h2 class="flex items-center gap-2 text-2xl font-bold">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-500"><path d="M2 13V6a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v7"/><path d="M22 13v3a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2v-3"/><path d="M18 13V6a2 2 0 0 0-2-2H8a2 2 0 0 0-2 2v7"/><path d="M18 13v3a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2v-3"/><path d="M12 20v2M5 16v6M19 16v6"/></svg>
+                <span>Análisis y Reportes Automáticos</span>
+            </h2>
+            <p class="text-sm text-gray-500">Métricas clave de la flota y rendimiento.</p>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-center mt-4">
+                <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-green-600">98%</h3>
+                    <p class="text-sm">Cumplimiento de Ruta</p>
+                </div>
+                <!-- El contador de alertas ahora se actualizará dinámicamente -->
+                <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-red-600" id="data-alert-count">0</h3>
+                    <p class="text-sm">Alertas Proactivas (últimas 24h)</p>
+                </div>
+                <!-- Se agregó un nuevo div para el consumo de combustible dinámico -->
+                <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-blue-600" id="data-fuel-consumption">25.3 L/100km</h3>
+                    <p class="text-sm">Consumo de Combustible Promedio</p>
+                </div>
+                <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+                    <h3 class="text-xl font-bold text-purple-600" id="data-eta-accuracy">95%</h3>
+                    <p class="text-sm">ETA Precisa</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script para la lógica dinámica de la aplicación -->
+    <script>
+        // Datos simulados del camión y la ruta
+        let truck = {
+            truckId: 'UNIDAD-42',
+            operator: 'Juan Pérez',
+            status: 'En ruta a Guadalajara',
+            currentSpeed: 85.0, // Velocidad inicial redondeada a 1 decimal
+            eta: '4h 15min',
+            routeDeviation: false,
+            isBrokenDown: false,
+            fuelConsumption: 25.3,
+            distanceToDestination: 550,
+            etaInMinutes: 255
+        };
+
+        // Variables para la nueva lógica del ETA
+        let simulationStartTime;
+        const totalTripDuration = 255 * 60 * 1000; // 255 minutos en milisegundos
+        let originalTruckIconUrl = 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-blue.png';
+        let brokenTruckIconUrl = 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png';
+
+        // Mensajes de chat simulados para demostrar la comunicación de la IA
+        let chatMessages = [
+            { id: 1, sender: 'IA Piloto', text: 'Hola Juan, tu viaje a Guadalajara ha comenzado. Conduce con cuidado.' },
+        ];
+        let alerts = [];
+
+        // Referencias a los elementos del DOM y el mapa
+        const chatContainerEl = document.getElementById('chat-container');
+        const alertsContainerEl = document.getElementById('alerts-container');
+        const dataOperatorEl = document.getElementById('data-operator');
+        const dataStatusEl = document.getElementById('data-status');
+        const dataSpeedEl = document.getElementById('data-speed');
+        const dataGeofenceEl = document.getElementById('data-geofence');
+        const dataEtaEl = document.getElementById('data-eta');
+        const dataDeviationEl = document.getElementById('data-deviation');
+        const truckIdEl = document.getElementById('truck-id');
+        const chatInput = document.getElementById('chat-input');
+        const dataFuelConsumptionEl = document.getElementById('data-fuel-consumption');
+        const resolveButton = document.getElementById('resolve-button');
+        // Referencia al nuevo elemento del contador de alertas
+        const dataAlertCountEl = document.getElementById('data-alert-count');
+
+        let map, truckMarker, destinationMarker;
+        // Puntos de la ruta real para una simulación más precisa (CDMX -> Querétaro -> Morelia -> GDL)
+        const waypoints = [
+            [19.4326, -99.1775], // Ciudad de México
+            [20.5925, -100.3879], // Santiago de Querétaro
+            [19.7015, -101.1856], // Morelia
+            [20.6272, -103.4116]  // Guadalajara
+        ];
+        let currentWaypointIndex = 0;
+        let currentPosition = [...waypoints[currentWaypointIndex]]; // Posición inicial del camión
+        let isArrived = false;
+
+        // Función para calcular la distancia entre dos puntos (lat/lng)
+        const getDistance = (lat1, lon1, lat2, lon2) => {
+            const R = 6371e3; // radio de la Tierra en metros
+            const φ1 = lat1 * Math.PI/180;
+            const φ2 = lat2 * Math.PI/180;
+            const Δφ = (lat2-lat1) * Math.PI/180;
+            const Δλ = (lon2-lon1) * Math.PI/180;
+
+            const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+                    Math.cos(φ1) * Math.cos(φ2) *
+                    Math.sin(Δλ/2) * Math.sin(Δλ/2);
+            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+            return R * c / 1000; // Distancia en kilómetros
+        };
+
+        /**
+         * Simula una geocodificación inversa para obtener la ciudad y el estado
+         * a partir de las coordenadas. En una aplicación real, esto usaría una API.
+         * @param {number} lat - Latitud.
+         * @param {number} lng - Longitud.
+         * @returns {string} - Ciudad y estado aproximados y las coordenadas.
+         */
+        const reverseGeocode = (lat, lng) => {
+            let locationString = '';
+            // Determine la ubicación basándose en la proximidad a los waypoints
+            if (getDistance(lat, lng, waypoints[0][0], waypoints[0][1]) < 100) { // Menos de 100km de CDMX
+                locationString = 'Ciudad de México, CDMX';
+            } else if (getDistance(lat, lng, waypoints[1][0], waypoints[1][1]) < 100) {
+                locationString = 'Santiago de Querétaro, Querétaro';
+            } else if (getDistance(lat, lng, waypoints[2][0], waypoints[2][1]) < 100) {
+                locationString = 'Morelia, Michoacán';
+            } else if (getDistance(lat, lng, waypoints[3][0], waypoints[3][1]) < 100) {
+                locationString = 'Guadalajara, Jalisco';
+            } else {
+                locationString = 'En ruta';
+            }
+            
+            // Agrega las coordenadas a la cadena de ubicación
+            return `${locationString} (Lat: ${lat.toFixed(4)}, Lng: ${lng.toFixed(4)})`;
+        };
+
+        // Función para inicializar el mapa con Leaflet.js
+        function initMap() {
+            map = L.map('map').setView(waypoints[0], 6); // Vista inicial más amplia para ver la ruta
+
+            L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                maxZoom: 19,
+                attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+            }).addTo(map);
+
+            // Icono del camión
+            const truckIcon = L.icon({
+                iconUrl: originalTruckIconUrl,
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            });
+
+            // Marcador del camión
+            truckMarker = L.marker(currentPosition, {icon: truckIcon}).addTo(map)
+                .bindPopup("<b>UNIDAD-42</b><br>En ruta a Guadalajara").openPopup();
+            
+            // Marcador del destino
+            destinationMarker = L.marker(waypoints[waypoints.length - 1], { icon: L.icon({
+                iconUrl: 'https://cdn.rawgit.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-green.png',
+                shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                iconSize: [25, 41],
+                iconAnchor: [12, 41],
+                popupAnchor: [1, -34],
+                shadowSize: [41, 41]
+            })}).addTo(map)
+                .bindPopup("<b>Estadio Akron</b><br>Destino final").openPopup();
+        }
+
+        // Función para renderizar el estado de la aplicación
+        const renderState = () => {
+            // Actualiza los datos del camión
+            truckIdEl.textContent = truck.truckId;
+            dataOperatorEl.textContent = truck.operator;
+            
+            // Usa una clase condicional para el estado
+            let statusColorClass = 'text-green-600';
+            if (truck.isBrokenDown) {
+                dataStatusEl.textContent = 'Inmovilizado por avería';
+                statusColorClass = 'text-red-600';
+            } else if (isArrived) {
+                dataStatusEl.textContent = 'Llegó a destino';
+                statusColorClass = 'text-purple-600';
+            } else {
+                dataStatusEl.textContent = truck.status;
+            }
+            dataStatusEl.className = `text-xl font-bold ${statusColorClass}`;
+            
+            // Muestra la velocidad como 0 si el camión está detenido, de lo contrario, con un decimal
+            dataSpeedEl.textContent = truck.isBrokenDown || isArrived ? '0 km/h' : `${truck.currentSpeed.toFixed(1)} km/h`;
+            
+            // Muestra el consumo de combustible
+            dataFuelConsumptionEl.textContent = `${truck.fuelConsumption.toFixed(1)} L/100km`;
+
+            // Lógica para mostrar la ubicación con ciudad, estado y coordenadas
+            if (truck.isBrokenDown) {
+                dataGeofenceEl.textContent = `Avería en: ${reverseGeocode(currentPosition[0], currentPosition[1])}`;
+            } else if (isArrived) {
+                dataGeofenceEl.textContent = `Geocerca: Estadio Akron - Llegada (Lat: ${waypoints[waypoints.length-1][0].toFixed(4)}, Lng: ${waypoints[waypoints.length-1][1].toFixed(4)})`;
+            } else {
+                dataGeofenceEl.textContent = `En ruta: ${reverseGeocode(currentPosition[0], currentPosition[1])}`;
+            }
+
+            dataEtaEl.textContent = truck.isBrokenDown ? 'Indefinido' : (isArrived ? 'Llegó' : truck.eta);
+            dataDeviationEl.textContent = truck.routeDeviation ? 'Sí' : 'No';
+
+            // Muestra u oculta el botón de "Resolver Avería"
+            resolveButton.style.display = truck.isBrokenDown ? 'block' : 'none';
+
+            // Limpia y renderiza los mensajes del chat
+            chatContainerEl.innerHTML = '';
+            chatMessages.forEach(msg => {
+                const messageDiv = document.createElement('div');
+                let senderClass = '';
+
+                switch (msg.sender) {
+                    case 'IA Piloto':
+                        // IA Piloto messages will be blue and on the left
+                        senderClass = 'bg-blue-500 text-white self-start';
+                        break;
+                    case 'Operador':
+                        // Operator messages will be grey and on the right
+                        senderClass = 'bg-gray-200 text-gray-900 self-end';
+                        break;
+                }
+                
+                messageDiv.className = `p-3 rounded-lg shadow-sm max-w-[80%] ${senderClass}`;
+                messageDiv.innerHTML = `<p class="font-bold">${msg.sender}</p><p class="text-sm">${msg.text}</p>`;
+                chatContainerEl.appendChild(messageDiv);
+            });
+            chatContainerEl.scrollTop = chatContainerEl.scrollHeight; // Auto-scroll
+
+            // Limpia y renderiza las alertas
+            alertsContainerEl.innerHTML = '';
+            if (alerts.length === 0) {
+                alertsContainerEl.innerHTML = '<p class="text-gray-500">No hay alertas en este momento.</p>';
+            } else {
+                alerts.forEach(alert => {
+                    const alertDiv = document.createElement('div');
+                    let severityClass = '';
+                    let severityText = '';
+                    switch (alert.severity) {
+                        case 'danger':
+                            severityClass = 'bg-red-100 text-red-800 border-l-4 border-red-500';
+                            severityText = '¡CRÍTICO!';
+                            break;
+                        case 'warning':
+                            severityClass = 'bg-yellow-100 text-yellow-800 border-l-4 border-yellow-500';
+                            severityText = 'Advertencia';
+                            break;
+                        case 'info':
+                            severityClass = 'bg-blue-100 text-blue-800 border-l-4 border-blue-500';
+                            severityText = 'Notificación';
+                            break;
+                        default:
+                            severityClass = 'bg-gray-100 text-gray-800 border-l-4 border-gray-500';
+                            severityText = 'Evento';
+                            break;
+                    }
+                    alertDiv.className = `p-3 rounded-lg shadow-sm ${severityClass}`;
+                    alertDiv.innerHTML = `<p class="font-bold flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14c-.93-1.65-3.07-1.65-4 0l-8 14c-.87 1.54.24 3.42 2 3.42h16c1.77 0 2.88-1.88 2-3.42Z"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>
+                        ${severityText}
+                    </p><p class="text-sm mt-1">${alert.message}</p>`;
+                    alertsContainerEl.appendChild(alertDiv);
+                });
+            }
+            // Actualiza el contador de alertas proactivas con la cantidad actual
+            dataAlertCountEl.textContent = alerts.length;
+        };
+
+        /**
+         * Función para actualizar las métricas de forma dinámica.
+         */
+        const updateMetrics = () => {
+            if (truck.isBrokenDown || isArrived) return;
+            
+            // Simula variaciones en la velocidad actual
+            const speedVariation = (Math.random() - 0.5) * 10; // +/- 5 km/h
+            truck.currentSpeed = Math.max(70, Math.min(95, truck.currentSpeed + speedVariation)); // Mantiene la velocidad entre 70 y 95
+
+            // Simula variaciones en el consumo de combustible
+            const fuelVariation = (Math.random() - 0.5) * 0.5; // +/- 0.25 L
+            truck.fuelConsumption = Math.max(20, Math.min(30, truck.fuelConsumption + fuelVariation)); // Mantiene el consumo en un rango realista
+
+            // Actualiza el ETA con una pequeña variación para simular condiciones reales
+            const elapsedTime = Date.now() - simulationStartTime;
+            let etaInMilliseconds = totalTripDuration - elapsedTime;
+            
+            // Agrega una variación aleatoria (entre -5 y +5 minutos) para que sea realista
+            const etaVariation = (Math.random() * 10 - 5) * 60 * 1000;
+            etaInMilliseconds += etaVariation;
+            
+            // Asegúrate de que el ETA no sea negativo
+            etaInMilliseconds = Math.max(0, etaInMilliseconds);
+
+            const hours = Math.floor(etaInMilliseconds / (1000 * 60 * 60));
+            const minutes = Math.floor((etaInMilliseconds % (1000 * 60 * 60)) / (1000 * 60));
+            truck.eta = `${hours}h ${minutes}min`;
+        };
+
+
+        /**
+         * Envía un mensaje desde el operador a la IA.
+         * @param {string} report - El texto del mensaje.
+         */
+        const sendOperatorReport = (report) => {
+            if (!report) return;
+
+            chatMessages.push({ id: Date.now(), sender: 'Operador', text: report });
+            renderState();
+
+            // La IA procesa y responde después de un pequeño retraso
+            setTimeout(() => {
+                let aiResponse;
+                if (report.toLowerCase().includes('avería')) {
+                    // Si hay una avería, detenemos el camión y actualizamos su estado
+                    truck.isBrokenDown = true;
+                    truck.status = 'Inmovilizado por avería';
+                    // Cambiamos el icono del marcador a rojo para indicar la avería
+                    const brokenTruckIcon = L.icon({
+                        iconUrl: brokenTruckIconUrl,
+                        shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                        iconSize: [25, 41],
+                        iconAnchor: [12, 41],
+                        popupAnchor: [1, -34],
+                        shadowSize: [41, 41]
+                    });
+                    truckMarker.setIcon(brokenTruckIcon);
+                    truckMarker.setPopupContent("<b>UNIDAD-42</b><br>¡Avería grave!");
+                    
+                    aiResponse = "Reporte de avería grave recibido. He notificado al supervisor. Espere su llamada.";
+                    alerts.push({
+                        id: Date.now(),
+                        type: 'escalation',
+                        message: `[${new Date().toLocaleTimeString()}] Alerta de avería: El operador ha reportado un problema mecánico.`,
+                        severity: 'danger',
+                        isResolved: false
+                    });
+                } else if (report.toLowerCase().includes('llegué a la bodega')) {
+                    aiResponse = "Reporte de llegada recibido. Puedes descansar, buen trabajo.";
+                } else {
+                    // Respuesta de la IA para cualquier otro mensaje
+                    aiResponse = "Mensaje recibido. Notificaré al supervisor si es necesario.";
+                }
+
+                chatMessages.push({ id: Date.now() + 1, sender: 'IA Piloto', text: aiResponse });
+                renderState();
+            }, 1500);
+        };
+
+        /**
+         * Maneja el envío de mensajes del operador desde el campo de texto del chat.
+         */
+        const sendOperatorMessage = () => {
+            const message = chatInput.value;
+            if (message.trim() !== '') {
+                sendOperatorReport(message);
+                chatInput.value = ''; // Limpia el campo de texto
+            }
+        };
+
+        /**
+         * Función para resolver la avería del camión y reanudar el viaje.
+         */
+        const resolveBreakdown = () => {
+            // Si el camión estaba inmovilizado...
+            if (truck.isBrokenDown) {
+                // Reestablece su estado a "En ruta"
+                truck.isBrokenDown = false;
+                truck.status = 'En ruta a Guadalajara';
+
+                // Restaura el icono del camión a azul
+                const normalTruckIcon = L.icon({
+                    iconUrl: originalTruckIconUrl,
+                    shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+                    iconSize: [25, 41],
+                    iconAnchor: [12, 41],
+                    popupAnchor: [1, -34],
+                    shadowSize: [41, 41]
+                });
+                truckMarker.setIcon(normalTruckIcon);
+                truckMarker.setPopupContent("<b>UNIDAD-42</b><br>En ruta a Guadalajara");
+                
+                // Agrega un mensaje de chat para informar que el problema fue resuelto
+                chatMessages.push({ id: Date.now(), sender: 'IA Piloto', text: 'Avería resuelta. Reanudando la ruta hacia Guadalajara. Conduce con precaución.' });
+                
+                // Encuentra la alerta de avería y actualiza su mensaje, en lugar de eliminarla
+                const breakdownAlert = alerts.find(alert => alert.type === 'escalation');
+                if (breakdownAlert) {
+                    breakdownAlert.message = `[${new Date().toLocaleTimeString()}] Avería Resuelta: El operador ha confirmado la reparación.`;
+                }
+
+                renderState();
+            }
+        };
+
+        /**
+         * Simula una llamada al supervisor.
+         */
+        const callSupervisor = () => {
+            // Agrega un mensaje al chat simulando la llamada del operador
+            chatMessages.push({ id: Date.now(), sender: 'Operador', text: 'Llamando al supervisor...' });
+            
+            // Agrega un mensaje de la IA confirmando que la llamada se ha registrado
+            setTimeout(() => {
+                const aiResponse = "He registrado la llamada al supervisor. Estará al tanto de la situación. Mantén la calma y espera instrucciones.";
+                chatMessages.push({ id: Date.now() + 1, sender: 'IA Piloto', text: aiResponse });
+                
+                // Agrega una alerta al panel de alertas para dejar un registro
+                alerts.push({
+                    id: Date.now(),
+                    type: 'call',
+                    message: `[${new Date().toLocaleTimeString()}] Evento: El operador ha iniciado una llamada al supervisor.`,
+                    severity: 'info',
+                });
+
+                renderState();
+            }, 1500);
+        };
+
+        // Simula la progresión del viaje y las alertas cada 5 segundos
+        const interval = setInterval(() => {
+            // Mover el camión SÓLO si no ha llegado o no está averiado
+            if (truckMarker && !isArrived && !truck.isBrokenDown) {
+                // Actualiza las métricas dinámicas
+                updateMetrics();
+
+                // Obtiene la posición actual y el siguiente punto de la ruta
+                const currentPoint = waypoints[currentWaypointIndex];
+                const nextPoint = waypoints[currentWaypointIndex + 1];
+
+                if (!nextPoint) {
+                    // Si ya no hay un siguiente punto, el camión ha llegado
+                    isArrived = true;
+                    truck.status = 'Llegó a destino';
+                    truckMarker.setLatLng(waypoints[waypoints.length - 1]);
+                    chatMessages.push({ id: Date.now() + 3, sender: 'IA Piloto', text: 'Felicidades, has llegado al Estadio Akron. ¡Reporta tu llegada!' });
+                    clearInterval(interval); // Detiene la simulación
+                    renderState();
+                    return;
+                }
+
+                // Calcula la distancia y el movimiento hacia el siguiente punto
+                const latDiff = nextPoint[0] - currentPosition[0];
+                const lngDiff = nextPoint[1] - currentPosition[1];
+                const distance = Math.sqrt(latDiff * latDiff + lngDiff * lngDiff);
+                const step = 0.05; // Ajusta este valor para una velocidad de simulación
+
+                if (distance < step) {
+                    // Si la distancia es muy corta, salta al siguiente waypoint
+                    currentPosition = nextPoint;
+                    currentWaypointIndex++;
+                } else {
+                    // Mueve el camión un paso hacia el siguiente waypoint
+                    const latStep = (latDiff / distance) * step;
+                    const lngStep = (lngDiff / distance) * step;
+                    
+                    currentPosition[0] += latStep;
+                    currentPosition[1] += lngStep;
+                }
+                truckMarker.setLatLng(currentPosition);
+
+                // Revisa aleatoriamente si hay eventos de la IA
+                if (Math.random() < 0.3) {
+                    const events = [
+                        () => {
+                            if (alerts.every(a => a.type !== 'geofence')) {
+                                alerts.push({
+                                    id: Date.now(),
+                                    type: 'geofence',
+                                    message: `[${new Date().toLocaleTimeString()}] Alerta: El camión entró en la geocerca de ${reverseGeocode(currentPosition[0], currentPosition[1])}.`,
+                                    severity: 'info',
+                                });
+                                chatMessages.push({
+                                    id: Date.now() + 2,
+                                    sender: 'IA Piloto',
+                                    text: 'Acaba de entrar en una geocerca. Por favor, reporta tu llegada.'
+                                });
+                            }
+                        },
+                        () => {
+                            if (alerts.every(a => a.type !== 'anomaly-speed')) {
+                                alerts.push({
+                                    id: Date.now(),
+                                    type: 'anomaly-speed',
+                                    message: `[${new Date().toLocaleTimeString()}] Anomalia: Velocidad anormal (${truck.currentSpeed.toFixed(1)} km/h). Posible problema de tráfico o mecánico.`,
+                                    severity: 'warning',
+                                });
+                            }
+                        },
+                        () => {
+                            if (alerts.every(a => a.type !== 'anomaly-route')) {
+                                alerts.push({
+                                    id: Date.now(),
+                                    type: 'anomaly-route',
+                                    message: `[${new Date().toLocaleTimeString()}] Anomalia: Desviación de ruta detectada. Notificando a supervisor.`,
+                                    severity: 'danger',
+                                });
+                                truck.routeDeviation = true;
+                            }
+                        },
+                        () => {
+                            if (alerts.every(a => a.type !== 'maintenance')) {
+                                alerts.push({
+                                    id: Date.now(),
+                                    type: 'maintenance',
+                                    message: `[${new Date().toLocaleTimeString()}] Predictivo: Posible mantenimiento requerido en 500 km.`,
+                                    severity: 'info',
+                                });
+                            }
+                        }
+                    ];
+                    // Dispara un evento aleatorio de la lista
+                    const randomEvent = events[Math.floor(Math.random() * events.length)];
+                    randomEvent();
+                }
+            }
+            renderState(); // Vuelve a renderizar la UI con los nuevos datos
+        }, 5000);
+
+        // Renderizado inicial y llamada a initMap
+        document.addEventListener('DOMContentLoaded', () => {
+            initMap();
+            renderState();
+            simulationStartTime = Date.now();
+        });
+    </script>
+</body>
+</html>
